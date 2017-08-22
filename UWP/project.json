@@ -1,6 +1,6 @@
 ﻿{
   "dependencies": {
-    "Zebble": "4.1.297",
+    "Zebble": "4.1.298",
     "Zebble.Grid": "3.12.142"
   },
   "frameworks": {

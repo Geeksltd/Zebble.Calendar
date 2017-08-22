@@ -1,0 +1,25 @@
+{
+  "Items": [
+    {
+      "Analyzer": "UseUsingsOnIDisposableAnalyzer",
+      "OccurrenceCount": 3455,
+      "Exceptions": null,
+      "SentToServer": true,
+      "InstallationName": "PAYMON"
+    },
+    {
+      "Analyzer": "UnusedMethodsAnalyzer",
+      "OccurrenceCount": 97,
+      "Exceptions": null,
+      "SentToServer": true,
+      "InstallationName": "PAYMON"
+    },
+    {
+      "Analyzer": "MeaningfulNameForVariablesAnalyzer",
+      "OccurrenceCount": 1,
+      "Exceptions": null,
+      "SentToServer": true,
+      "InstallationName": "PAYMON"
+    }
+  ]
+}

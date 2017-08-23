@@ -25,10 +25,10 @@
 
         public Calendar()
         {
-            TitleLeftArrow = new ItemButton { Text = "❰" };
-            TitleLabel = new TextView();
-            TitleRightArrow = new ItemButton { Text = "❱" };
-            MonthNavigationLayout = new Stack { Direction = RepeatDirection.Horizontal };
+            TitleLeftArrow = new ItemButton { Text = "❰", Id = "LeftArrow" };
+            TitleLabel = new TextView() { Id = "Title" };
+            TitleRightArrow = new ItemButton { Text = "❱", Id = "RightArrow" };
+            MonthNavigationLayout = new Stack { Direction = RepeatDirection.Horizontal, Id="MonthNav" };
 
             MonthNavigationLayout.Add(TitleLeftArrow);
             MonthNavigationLayout.Add(TitleLabel);
@@ -36,7 +36,7 @@
 
             MainView = new Stack();
             MainView.Add(MonthNavigationLayout);
-            MainView.Add(ContentView = new Stack());
+            MainView.Add(ContentView = new Stack() { Id = "DayNav" });
 
             TitleLeftArrow.Tapped.HandleWith(LeftArrowTapped);
             TitleRightArrow.Tapped.HandleWith(RightArrowTapped);
@@ -163,7 +163,10 @@
                 {
                     for (var column = 0; column < WEEK_DAYS; column++)
                     {
-                        var button = new ItemButton();
+                        var button = new ItemButton()
+                        {
+                            Id = "Day"
+                        };
 
                         Buttons.Add(button);
                         var lastButton = Buttons.Last();

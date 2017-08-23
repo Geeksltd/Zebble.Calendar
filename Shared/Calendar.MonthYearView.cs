@@ -10,9 +10,6 @@ namespace Zebble
         public int YearRows { get; set; } = 4;
         public int YearColumns { get; set; } = 4;
 
-        // TODO: Remove these? Everything should be CSS.
-        double _Width, _Height;
-
         Stack TemporatyView;
 
         List<ItemButton> YearButtons;
@@ -25,8 +22,6 @@ namespace Zebble
             {
                 YearButtons = new List<ItemButton>();
                 await CloneAndClearContentView();
-                _Width = ContentView.Width.CurrentValue / MonthsToShow;
-                _Height = ContentView.Height.CurrentValue / MonthsToShow;
             }
             switch (Scope)
             {
@@ -43,8 +38,6 @@ namespace Zebble
             {
                 await CloneAndClearContentView();
                 YearButtons = new List<ItemButton>();
-                _Width = ContentView.Width.CurrentValue / MonthsToShow;
-                _Height = ContentView.Height.CurrentValue / MonthsToShow;
             }
             switch (Scope)
             {
@@ -83,6 +76,7 @@ namespace Zebble
             TitleLeftArrow.Visible = TitleRightArrow.Visible = true;
             await ContentView.ClearChildren();
             await ReAddToContentView();
+            ChangeCalendar(CalandarChanges.All);
         }
 
         public async Task ShowMonths()
@@ -95,7 +89,8 @@ namespace Zebble
                     var button = new ItemButton
                     {
                         Text = DateTimeFormatInfo.CurrentInfo.MonthNames[(row * 3) + column],
-                        Date = new DateTime(StartDate.Year, (row * 3) + column + 1, 1)
+                        Date = new DateTime(StartDate.Year, (row * 3) + column + 1, 1),
+                        Id = "Month"
                     };
 
                     button.Tapped.Handle(async args =>
@@ -109,10 +104,6 @@ namespace Zebble
                     await details.Add(button);
                 }
             }
-
-            details.Width(_Width);
-            details.Height(_Height);
-
             await ContentView.ClearChildren();
             await ContentView.Add(details);
 
@@ -134,11 +125,9 @@ namespace Zebble
                     var button = new ItemButton
                     {
                         Text = $"{StartDate.Year + (temp - (YearColumns * YearRows / 2))}",
-                        Date = new DateTime(StartDate.Year + (temp - (YearColumns * YearRows / 2)), StartDate.Month, 1)
+                        Date = new DateTime(StartDate.Year + (temp - (YearColumns * YearRows / 2)), StartDate.Month, 1),
+                        Id = "Year"
                     };
-
-                    button.Width(ContentView.Width.CurrentValue / YearRows);
-                    button.Height(ContentView.Height.CurrentValue / YearColumns);
                     button.Tapped.Handle(async args =>
                         {
                             if (EnableTitleMonthYearView)
@@ -152,8 +141,6 @@ namespace Zebble
                     await details.Add(button);
                 }
             }
-            details.Width(_Width);
-            details.Height(_Height);
             await ContentView.ClearChildren();
             await ContentView.Add(details);
             Scope = CalendarScope.Years;

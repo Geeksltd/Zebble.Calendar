@@ -17,7 +17,7 @@ namespace Zebble
             }
         }
 
-        public bool MultiSelectable { set; get; }
+        public bool MultiSelectable { set; get; } = false;
 
         public List<DateTime> SelectedDates { set; get; } = new List<DateTime>(1);
 

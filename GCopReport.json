@@ -2,14 +2,14 @@
   "Items": [
     {
       "Analyzer": "UseUsingsOnIDisposableAnalyzer",
-      "OccurrenceCount": 3455,
+      "OccurrenceCount": 3522,
       "Exceptions": null,
       "SentToServer": true,
       "InstallationName": "PAYMON"
     },
     {
       "Analyzer": "UnusedMethodsAnalyzer",
-      "OccurrenceCount": 189,
+      "OccurrenceCount": 357,
       "Exceptions": null,
       "SentToServer": true,
       "InstallationName": "PAYMON"

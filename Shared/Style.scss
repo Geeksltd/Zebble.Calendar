@@ -1,0 +1,13 @@
+﻿Calendar { font-family: sans-serif; width: 395px; border: 1px; border-top: 1px; border-color: #d9dce5; margin: 20px;
+
+    #MonthNav { width: 100%; height: 50px; background: #e9eaf0; border: 0px; margin-bottom: 10px; }
+    #LeftArrow { border: 0; height: 50px; }
+    #RightArrow { border: 0; height: 50px; }
+    #Title { text-align: center; font-family: sans-serif; font-size: 28px; height: 50px; }
+    #DayNav { padding: 10px; }
+    #Day { width: 45px; height: 45px; background: white; border-radius: 2px; border: 1px; border-color: #d9dce5; text-align: center; color: #4c5373; margin: 4px; }
+    #Day:active { background: #ff8263; color: #fff; }
+    #Day:out-of-month { color: #b6bacc; border-color: #f3f4f7 }
+    #Month { width: 115px; height: 70px; border-radius: 2px; border: 1px; border-color: #d9dce5; text-align: center; color: #4c5373; margin: 4px; }
+    #Year { width: 85px; height: 70px; border-radius: 2px; border: 1px; border-color: #d9dce5; text-align: center; color: #4c5373; margin: 4px; }
+}

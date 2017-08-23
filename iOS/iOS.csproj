@@ -43,9 +43,11 @@
     <Reference Include="System.Core" />
     <Reference Include="Zebble.Grid.iOS, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Zebble.Grid.3.12.142\lib\Xamarin.iOS10\Zebble.Grid.iOS.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Zebble.iOS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Zebble.4.1.303\lib\Xamarin.iOS10\Zebble.iOS.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -44,16 +44,36 @@
             WeekNumberLabels[index / WEEK_DAYS].Text = $"{weekNumber}";
         }
 
+        protected async Task CreateWeeknumbers()
+        {
+            WeekNumberLabels.Clear();
+            WeekNumbers.Clear();
+            if (!ShowNumberOfWeeks) return;
+
+            for (var i = 0; i < MonthsToShow; i++)
+            {
+                var weekNumbers = new Grid { Columns = 1 };
+
+                for (var row = 0; row < MAX_WEEK_IN_MONTH; row++)
+                {
+                    var txt = new TextView();
+                    WeekNumberLabels.Add(txt);
+                    await weekNumbers.AddAt(row, txt);
+                }
+                WeekNumbers.Add(weekNumbers);
+            }
+        }
+
         protected async Task ShowHideElements()
         {
             if (MainCalendars.None()) return;
 
-            await ContentView.ClearChildren();
+            await ItemsContainer.ClearChildren();
             WeekDayLabels.Clear();
 
             for (var i = 0; i < MonthsToShow; i++)
             {
-                var main = MainCalendars[i];
+                View main = MainCalendars[i];
 
                 if (ShowInBetweenMonthLabels && i > 0)
                 {
@@ -63,19 +83,19 @@
                         MonthTitleLabels = new List<TextView>(MonthsToShow);
 
                     MonthTitleLabels.Add(label);
-                    await ContentView.Add(label);
+                    await ItemsContainer.Add(label);
                 }
 
                 if (ShowNumberOfWeeks)
                 {
-                    main = new Grid { Direction = RepeatDirection.Horizontal };
+                    main = new Stack { Direction = RepeatDirection.Horizontal, Id = "NumberOfWeeks" };
                     await main.Add(WeekNumbers[i]);
                     await main.Add(MainCalendars[i]);
                 }
 
                 if (ShowWeekdays)
                 {
-                    var dayLabels = new Grid { Columns = WEEK_DAYS };
+                    var dayLabels = new Stack { Direction = RepeatDirection.Horizontal, Id="WeekdaysContainer" };
 
                     for (var c = 0; c < WEEK_DAYS; c++)
                     {
@@ -84,12 +104,10 @@
                         await dayLabels.AddAt(c, day);
                     }
 
-                    var stack = new Stack();
-                    await stack.Add(dayLabels);
-                    await stack.Add(main);
-                    await ContentView.Add(stack);
+                    await ItemsContainer.Add(dayLabels);
                 }
-                else await ContentView.Add(main);
+
+                await ItemsContainer.Add(main);
             }
         }
     }

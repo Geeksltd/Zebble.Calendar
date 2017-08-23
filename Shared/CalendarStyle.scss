@@ -1,0 +1,22 @@
+﻿$border-color: #d9dce5;
+
+Calendar { border: 1px $border-color;
+
+    TextView { text-align: center; }
+
+    #Header { height: 50px; background: #e9eaf0; margin-bottom: 10px;
+        #Previous, #Next, #Title { height: 100%; }
+        #Title { font-size: 20px; }
+    }
+
+    #WeekdaysContainer { height: 20px; margin-bottom: 5px; }
+
+    Calendar-ItemButton { padding: 10px 0; border-radius: 2px; border: 1px $border-color; border-radius: 2px; color: #4c5373; margin: 3px; }
+
+    #ItemsContainer { padding: 5px;
+        #Day { height: calc("view.Width, x=>x"); padding: 0; background: #fff;
+            &:active { background: #ff8263; color: #fff; }
+            &:out-of-month { color: #b6bacc; border: 0; }
+        }
+    }
+}

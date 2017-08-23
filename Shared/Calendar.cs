@@ -14,7 +14,8 @@
         List<ItemButton> Buttons;
         List<Grid> MainCalendars;
         List<TextView> MonthTitleLabels;
-        Stack MainView, ContentView;
+        Stack MainView = new Stack();
+        Stack ItemsContainer = new Stack { Id = "ItemsContainer" };
 
         bool limitSelectionToRange, showInBetweenMonthLabels = true;
         int monthsToShow = 1;
@@ -25,21 +26,14 @@
 
         public Calendar()
         {
-            TitleLeftArrow = new ItemButton { Text = "❰", Id = "LeftArrow" };
-            TitleLabel = new TextView() { Id = "Title" };
-            TitleRightArrow = new ItemButton { Text = "❱", Id = "RightArrow" };
-            MonthNavigationLayout = new Stack { Direction = RepeatDirection.Horizontal, Id="MonthNav" };
-
-            MonthNavigationLayout.Add(TitleLeftArrow);
-            MonthNavigationLayout.Add(TitleLabel);
-            MonthNavigationLayout.Add(TitleRightArrow);
-
+            PrevButton = new TextView { Text = "❰", Id = "Previous" };
+            TitleLabel = new TextView { Id = "Title" };
+            NextButton = new TextView { Text = "❱", Id = "Next" };
+            Header = new Stack { Direction = RepeatDirection.Horizontal, Id = "Header" };
             MainView = new Stack();
-            MainView.Add(MonthNavigationLayout);
-            MainView.Add(ContentView = new Stack() { Id = "DayNav" });
 
-            TitleLeftArrow.Tapped.HandleWith(LeftArrowTapped);
-            TitleRightArrow.Tapped.HandleWith(RightArrowTapped);
+            PrevButton.Tapped.HandleWith(PrevButtonTapped);
+            NextButton.Tapped.HandleWith(NextButtonTapped);
 
             TitleLabel.Tapped.Handle(() => NextMonthYearView());
 
@@ -49,6 +43,17 @@
             MainCalendars = new List<Grid>(1);
 
             Scope = CalendarScope.Days;
+        }
+
+        public override async Task OnInitializing()
+        {
+            await base.OnInitializing();
+
+            await MainView.Add(Header);
+            await Header.Add(PrevButton);
+            await Header.Add(TitleLabel);
+            await Header.Add(NextButton);
+            await MainView.Add(ItemsContainer);
         }
 
         public bool LimitSelectionToRange
@@ -131,25 +136,7 @@
             await ShowHideElements();
         }
 
-        protected async Task CreateWeeknumbers()
-        {
-            WeekNumberLabels.Clear();
-            WeekNumbers.Clear();
-            if (!ShowNumberOfWeeks) return;
-
-            for (var i = 0; i < MonthsToShow; i++)
-            {
-                var weekNumbers = new Grid { Columns = 1 };
-
-                for (var row = 0; row < MAX_WEEK_IN_MONTH; row++)
-                {
-                    var txt = new TextView();
-                    WeekNumberLabels.Add(txt);
-                    await weekNumbers.AddAt(row, txt);
-                }
-                WeekNumbers.Add(weekNumbers);
-            }
-        }
+       
 
         protected async Task CreateButtons()
         {
@@ -239,8 +226,8 @@
 
             if (LimitSelectionToRange)
             {
-                TitleLeftArrow.Enabled = !(MinDate.HasValue && GetCalendarStartDate(StartDate) < MinDate);
-                TitleRightArrow.Enabled = !(MaxDate.HasValue && start > MaxDate);
+                PrevButton.Enabled = !(MinDate.HasValue && GetCalendarStartDate(StartDate) < MinDate);
+                NextButton.Enabled = !(MaxDate.HasValue && start > MaxDate);
             }
 
             Add(MainView);

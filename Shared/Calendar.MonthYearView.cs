@@ -52,7 +52,7 @@ namespace Zebble
         {
             if (TemporatyView == null)
                 TemporatyView = new Stack().Absolute().Hide();
-            var children = ContentView.AllChildren;
+            var children = ItemsContainer.AllChildren;
 
             if (children.Any(x => x.Native != null))
                 await Root.Add(TemporatyView, awaitNative: true);
@@ -63,18 +63,18 @@ namespace Zebble
 
         async Task ReAddToContentView()
         {
-            await ContentView.ClearChildren();
+            await ItemsContainer.ClearChildren();
             var children = TemporatyView.AllChildren;
             foreach (var child in children)
-                await child.MoveTo(ContentView);
+                await child.MoveTo(ItemsContainer);
             TemporatyView = null;
         }
 
         public async Task ShowDays()
         {
             Scope = CalendarScope.Days;
-            TitleLeftArrow.Visible = TitleRightArrow.Visible = true;
-            await ContentView.ClearChildren();
+            PrevButton.Visible = NextButton.Visible = true;
+            await ItemsContainer.ClearChildren();
             await ReAddToContentView();
             ChangeCalendar(CalandarChanges.All);
         }
@@ -95,7 +95,7 @@ namespace Zebble
 
                     button.Tapped.Handle(async args =>
                     {
-                        if (EnableTitleMonthYearView)
+                        if (!LockScope)
                         {
                             StartDate = button.Date.Value;
                             await PrevMonthYearView();
@@ -104,11 +104,11 @@ namespace Zebble
                     await details.Add(button);
                 }
             }
-            await ContentView.ClearChildren();
-            await ContentView.Add(details);
+            await ItemsContainer.ClearChildren();
+            await ItemsContainer.Add(details);
 
             Scope = CalendarScope.Months;
-            TitleLeftArrow.Visible = TitleRightArrow.Visible = false;
+            PrevButton.Visible = NextButton.Visible = false;
         }
 
         public async Task ShowYears()
@@ -130,7 +130,7 @@ namespace Zebble
                     };
                     button.Tapped.Handle(async args =>
                         {
-                            if (EnableTitleMonthYearView)
+                            if (!LockScope)
                             {
                                 StartDate = button.Date.Value;
                                 await PrevMonthYearView();
@@ -141,11 +141,11 @@ namespace Zebble
                     await details.Add(button);
                 }
             }
-            await ContentView.ClearChildren();
-            await ContentView.Add(details);
+            await ItemsContainer.ClearChildren();
+            await ItemsContainer.Add(details);
             Scope = CalendarScope.Years;
-            TitleLeftArrow.Visible = true;
-            TitleRightArrow.Visible = true;
+            PrevButton.Visible = true;
+            NextButton.Visible = true;
         }
 
         protected void NextPrevYears(bool isNext)

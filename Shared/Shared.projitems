@@ -11,7 +11,7 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)NuGet\NuGet.nuspec" />
     <None Include="$(MSBuildThisFileDirectory)NuGet\CreatePackage.bat" />
-    <None Include="$(MSBuildThisFileDirectory)Style.scss" />
+    <None Include="$(MSBuildThisFileDirectory)CalendarStyle.scss" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)NuGet\Icon.png" />

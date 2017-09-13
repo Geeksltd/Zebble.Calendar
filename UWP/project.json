@@ -1,6 +1,6 @@
 ﻿{
   "dependencies": {
-    "Zebble": "4.2.341",
+    "Zebble": "4.2.342",
     "Zebble.Grid": "3.12.142"
   },
   "frameworks": {
@@ -15,5 +15,6 @@
     "win10-x64-aot": {}
   }
 }
+
 
 

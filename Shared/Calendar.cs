@@ -7,40 +7,38 @@
 
     public partial class Calendar : View
     {
-        const int WEEK_DAYS = 7;
-        const int MAX_WEEK_IN_MONTH = 6;
-        const int DAYS_IN_MONTH_VIEW = WEEK_DAYS * MAX_WEEK_IN_MONTH;
+        Stack MainView;
+        Stack ItemsContainer;
 
-        List<ItemButton> Buttons;
-        List<Grid> MainCalendars;
-        List<TextView> MonthTitleLabels;
-        Stack MainView = new Stack();
-        Stack ItemsContainer = new Stack { Id = "ItemsContainer" };
+        HeaderView Header;
+        DaysView Days;
+        WeekDaysView WeekDays;
+        YearsView Years;
 
-        bool limitSelectionToRange, showInBetweenMonthLabels = true;
-        int monthsToShow = 1;
-        DateTime? minDate, maxDate;
-        DateTime startDate = DateTime.Today;
-        DayOfWeek startDay = DayOfWeek.Sunday;
-        List<SpecialDate> specialDates = new List<SpecialDate>();
+        bool limitSelectionToRange;
+
+        DateTime startDate;
+        DayOfWeek startDay;
+
+        Stack TemporatyView;
+
+        public CalendarScope Scope { get; protected set; }
 
         public Calendar()
         {
-            PrevButton = new TextView { Text = "❰", Id = "Previous" };
-            TitleLabel = new TextView { Id = "Title" };
-            NextButton = new TextView { Text = "❱", Id = "Next" };
-            Header = new Stack { Direction = RepeatDirection.Horizontal, Id = "Header" };
             MainView = new Stack();
+            ItemsContainer = new Stack { Id = "ItemsContainer" };
 
-            PrevButton.Tapped.HandleWith(PrevButtonTapped);
-            NextButton.Tapped.HandleWith(NextButtonTapped);
+            Header = new HeaderView();
+            Header.PreviousTapped.HandleWith(Header_PreviousTapped);
+            Header.NextTapped.HandleWith(Header_NextTapped);
+            Header.TitleTapped.Handle(() => ChangeScope(nextScope: true));
 
-            TitleLabel.Tapped.Handle(() => NextMonthYearView());
+            Days = new DaysView();
+            WeekDays = new WeekDaysView();
 
-            WeekDayLabels = new List<TextView>(WEEK_DAYS);
-
-            Buttons = new List<ItemButton>(DAYS_IN_MONTH_VIEW);
-            MainCalendars = new List<Grid>(1);
+            startDate = DateTime.Today;
+            startDay = DayOfWeek.Sunday;
 
             Scope = CalendarScope.Days;
         }
@@ -50,208 +48,211 @@
             await base.OnInitializing();
 
             await MainView.Add(Header);
-            await Header.Add(PrevButton);
-            await Header.Add(TitleLabel);
-            await Header.Add(NextButton);
+
             await MainView.Add(ItemsContainer);
+
+            await ItemsContainer.Add(WeekDays);
+
+            await ItemsContainer.Add(Days);
         }
 
         public bool LimitSelectionToRange
         {
             get => limitSelectionToRange;
-            set { ChangeCalendar(CalandarChanges.MaxMin); limitSelectionToRange = value; }
+            set { limitSelectionToRange = value; ChangeCalendar(); }
         }
 
         public DateTime? MinDate
         {
-            get => minDate;
-            set { ChangeCalendar(CalandarChanges.MaxMin); minDate = value; }
+            get => Days.MinDate;
+            set => Days.MinDate = value;
         }
 
         public DateTime? MaxDate
         {
-            get => maxDate;
-            set { ChangeCalendar(CalandarChanges.MaxMin); maxDate = value; }
+            get => Days.MaxDate;
+            set => Days.MaxDate = value;
         }
 
         public DateTime StartDate
         {
             get => startDate;
-            set { ChangeCalendar(CalandarChanges.StartDate); startDate = value.Date; }
+            set { startDate = value.Date; ChangeCalendar(); }
         }
 
         public DayOfWeek StartDay
         {
             get => startDay;
-            set { ChangeCalendar(CalandarChanges.StartDay); startDay = value; }
+            set { startDay = value; ChangeCalendar(); }
         }
 
         public int MonthsToShow
         {
-            get { return monthsToShow; }
-            set { ChangeCalendar(CalandarChanges.All); monthsToShow = value; }
-        }
-
-        public bool ShowInBetweenMonthLabels
-        {
-            get { return showInBetweenMonthLabels; }
-            set
-            {
-                ChangeCalendar(CalandarChanges.All);
-                showInBetweenMonthLabels = value;
-            }
+            get => Days.MonthsToShow;
+            set => Days.MonthsToShow = value;
         }
 
         public List<SpecialDate> SpecialDates
         {
-            get => specialDates;
-            set { ChangeCalendar(CalandarChanges.MaxMin); specialDates = value; }
-        }
-
-        public DateTime GetCalendarStartDate(DateTime date)
-        {
-            var start = date;
-            var beginOfMonth = start.Day == 1;
-            while (!beginOfMonth || start.DayOfWeek != StartDay)
-            {
-                start = start.AddDays(-1);
-                beginOfMonth |= start.Day == 1;
-            }
-            return start;
+            get => Days.SpecialDates;
+            set => Days.SpecialDates = value;
         }
 
         public override async Task OnPreRender()
         {
-            await FillWindows();
             await base.OnPreRender();
-            ChangeCalendar(CalandarChanges.All);
+            await ChangeCalendar();
         }
 
-        protected Task Fill() => FillWindows();
-
-        protected async Task FillWindows()
+        async Task ChangeCalendar()
         {
-            await CreateWeeknumbers();
-            await CreateButtons();
-            await ShowHideElements();
-        }
+            Header.TitleText = StartDate.ToString("MMM yyyy");
 
-       
+            var start = CalendarHelpers.GetCalendarStartDate(StartDate, StartDay);
 
-        protected async Task CreateButtons()
-        {
-            Buttons.Clear();
-            MainCalendars.Clear();
-            for (var i = 0; i < MonthsToShow; i++)
-            {
-                var mainCalendar = new Grid { Columns = WEEK_DAYS };
-
-                for (var row = 0; row < MAX_WEEK_IN_MONTH; row++)
-                {
-                    for (var column = 0; column < WEEK_DAYS; column++)
-                    {
-                        var button = new ItemButton()
-                        {
-                            Id = "Day"
-                        };
-
-                        Buttons.Add(button);
-                        var lastButton = Buttons.Last();
-                        lastButton.Tapped.Handle(ItemButtonTapped);
-
-                        await mainCalendar.Add(button);
-                    }
-                }
-                MainCalendars.Add(mainCalendar);
-                MainCalendars.ForEach(async a => await a.EnsureFullColumns());
-            }
-        }
-
-        public void ForceRedraw() => ChangeCalendar(CalandarChanges.All);
-
-        protected void ChangeCalendar(CalandarChanges changes)
-        {
-            if (changes.HasFlag(CalandarChanges.StartDate))
-            {
-                TitleLabel.Text = StartDate.ToString("MMM yyyy");
-                if (MonthTitleLabels != null)
-                {
-                    var tls = StartDate.AddMonths(1);
-                    foreach (var tl in MonthTitleLabels)
-                    {
-                        tl.Text = tls.ToString();
-                        tls = tls.AddMonths(1);
-                    }
-                }
-            }
-
-            var start = GetCalendarStartDate(StartDate);
-            var beginOfMonth = false;
-            var endOfMonth = false;
-            for (var i = 0; i < Buttons.Count; i++)
-            {
-                endOfMonth |= beginOfMonth && start.Day == 1;
-                beginOfMonth |= start.Day == 1;
-
-                if (i < WeekDayLabels.Count && ShowWeekdays && changes.HasFlag(CalandarChanges.StartDay))
-                    WeekDayLabels[i].Text = start.ToString(WeekdayFormat);
-
-                ChangeWeekNumbers(start, i);
-
-                Buttons[i].Text = $"{start.Day}";
-                Buttons[i].Date = start;
-                Buttons[i].OutOfMonth = !(beginOfMonth && !endOfMonth);
-                Buttons[i].Enabled = MonthsToShow == 1 || !Buttons[i].OutOfMonth;
-
-                var specialDate = SpecialDates?.FirstOrDefault(s => s.Date == start);
-
-                Unselect(Buttons[i]);
-
-                if (start < MinDate || start > MaxDate) Buttons[i].SetDisabled();
-                else if (Buttons[i].Enabled && SelectedDates.Contains(start))
-                    Buttons[i].Select();
-                else if (specialDate != null) Buttons[i].Enabled = specialDate.Selectable;
-
-                start = start.AddDays(1);
-                if (i != 0)
-                {
-                    if ((i + 1) % DAYS_IN_MONTH_VIEW == 0)
-                    {
-                        beginOfMonth = false;
-                        endOfMonth = false;
-                        start = GetCalendarStartDate(start);
-                    }
-                }
-            }
+            Days.StartDate = StartDate;
 
             if (LimitSelectionToRange)
             {
-                PrevButton.Enabled = !(MinDate.HasValue && GetCalendarStartDate(StartDate) < MinDate);
-                NextButton.Enabled = !(MaxDate.HasValue && start > MaxDate);
+                Header.PreviousEnabled = !(MinDate.HasValue && CalendarHelpers.GetCalendarStartDate(StartDate, StartDay) < MinDate);
+                Header.NextEnabled = !(MaxDate.HasValue && start > MaxDate);
             }
-
-            Add(MainView);
+            await Add(MainView);
         }
 
-        protected void Unselect(ItemButton button)
+        bool lockScope;
+        public bool LockScope
         {
-            button.Selected = false;
-            button.Enabled = MonthsToShow == 1 || !button.OutOfMonth;
-        }
-
-        Task ItemButtonTapped(TouchEventArgs args)
-        {
-            var item = args.View as ItemButton;
-
-            var selectedDate = item.Date;
-            if (SelectedDate.HasValue && selectedDate.HasValue && SelectedDate == selectedDate)
+            get => lockScope;
+            set
             {
-                ChangeSelectedDate(selectedDate);
-                SelectedDate = null;
+                lockScope = value;
+                if (value) Header.TitleTapped.Handle(() => ChangeScope(nextScope: true));
             }
-            else SelectedDate = selectedDate;
+        }
 
-            return Task.CompletedTask;
+        void Header_NextTapped()
+        {
+            if (Scope == CalendarScope.Years)
+                startDate = Years.NextPage();
+            else
+                startDate = Days.NextPage();
+            
+            Header.TitleText = StartDate.ToString("MMM yyyy");
+        }
+
+        void Header_PreviousTapped()
+        {
+            if (Scope == CalendarScope.Years)
+                startDate = Years.PreviousPage();
+            else
+                startDate = Days.PreviousPage();
+            Header.TitleText = StartDate.ToString("MMM yyyy");
+        }
+
+        ///
+        /// MonthYearView
+        async Task ChangeScope(bool nextScope)
+        {
+            if (TemporatyView == null)
+            {
+                await CloneAndClearContentView();
+            }
+            switch (Scope)
+            {
+                case CalendarScope.Days:
+                    {
+                        if (nextScope)
+                            await GoToMonths();
+                        else
+                            await GoToYears();
+                        break;
+                    }
+                case CalendarScope.Months:
+                    {
+                        if (nextScope)
+                            await GoToYears();
+                        else
+                            await GoToDays();
+                        break;
+                    }
+                case CalendarScope.Years:
+                    {
+                        if (nextScope)
+                            await GoToDays();
+                        else
+                            await GoToMonths();
+                        break;
+                    }
+                default: await GoToDays(); break;
+            }
+        }
+
+        async Task CloneAndClearContentView()
+        {
+            if (TemporatyView == null)
+                TemporatyView = new Stack().Absolute().Hide();
+            var children = ItemsContainer.AllChildren;
+
+            if (children.Any(x => x.Native != null))
+                await Root.Add(TemporatyView, awaitNative: true);
+
+            foreach (var child in children)
+                await child.MoveTo(TemporatyView);
+        }
+
+        async Task ReAddToContentView()
+        {
+            await ItemsContainer.ClearChildren();
+            var children = TemporatyView.AllChildren;
+            foreach (var child in children)
+                await child.MoveTo(ItemsContainer);
+            TemporatyView = null;
+        }
+
+        async Task GoToDays()
+        {
+            Scope = CalendarScope.Days;
+            Header.PreviousVisible = Header.NextVisible = true;
+            await ItemsContainer.ClearChildren();
+            await ReAddToContentView();
+            await ChangeCalendar();
+        }
+
+        async Task GoToMonths()
+        {
+            var months = new MonthsView(StartDate);
+            months.MonthTapped.Handle(async args =>
+            {
+                if (!LockScope)
+                {
+                    StartDate = args;
+                    await ChangeScope(nextScope: false);
+                }
+            });
+            await ItemsContainer.ClearChildren();
+            await ItemsContainer.Add(months);
+
+            Scope = CalendarScope.Months;
+            Header.PreviousVisible = Header.NextVisible = false;
+        }
+
+        async Task GoToYears()
+        {
+            Years = new YearsView(StartDate);
+            Years.YearTapped.Handle(async args =>
+            {
+                if (!LockScope)
+                {
+                    StartDate = args;
+                    await ChangeScope(nextScope: false);
+                }
+            });
+            await ItemsContainer.ClearChildren();
+            await ItemsContainer.Add(Years);
+            Scope = CalendarScope.Years;
+            Header.PreviousVisible = true;
+            Header.NextVisible = true;
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿namespace Zebble
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
 
     public partial class Calendar : View
@@ -17,6 +15,8 @@
 
         bool limitSelectionToRange;
 
+        bool lockScope;
+
         DateTime startDate;
         DayOfWeek startDay;
 
@@ -26,6 +26,10 @@
 
         public Calendar()
         {
+            startDate = DateTime.Today;
+            startDay = DayOfWeek.Sunday;
+
+            Scope = CalendarScope.Days;
             MainView = new Stack();
             ItemsContainer = new Stack { Id = "ItemsContainer" };
 
@@ -34,13 +38,8 @@
             Header.NextTapped.HandleWith(Header_NextTapped);
             Header.TitleTapped.Handle(() => ChangeScope(nextScope: true));
 
-            Days = new DaysView();
+            Days = new DaysView(new CalendarAttributes {StartDate = startDate});
             WeekDays = new WeekDaysView();
-
-            startDate = DateTime.Today;
-            startDay = DayOfWeek.Sunday;
-
-            Scope = CalendarScope.Days;
         }
 
         public override async Task OnInitializing()
@@ -59,68 +58,63 @@
         public bool LimitSelectionToRange
         {
             get => limitSelectionToRange;
-            set { limitSelectionToRange = value; ChangeCalendar(); }
+            set { limitSelectionToRange = value; Change(); }
         }
 
         public DateTime? MinDate
         {
-            get => Days.MinDate;
-            set => Days.MinDate = value;
+            get => Days.Attributes.MinDate;
+            set => Days.Attributes.MinDate = value;
         }
 
         public DateTime? MaxDate
         {
-            get => Days.MaxDate;
-            set => Days.MaxDate = value;
+            get => Days.Attributes.MaxDate;
+            set => Days.Attributes.MaxDate = value;
         }
 
         public DateTime StartDate
         {
             get => startDate;
-            set { startDate = value.Date; ChangeCalendar(); }
+            set { startDate = value.Date; Change(); }
         }
 
         public DayOfWeek StartDay
         {
             get => startDay;
-            set { startDay = value; ChangeCalendar(); }
+            set { startDay = value; Change(); }
         }
 
         public int MonthsToShow
         {
-            get => Days.MonthsToShow;
-            set => Days.MonthsToShow = value;
+            get => Days.Attributes.MonthsToShow;
+            set => Days.Attributes.MonthsToShow = value;
         }
 
-        public List<SpecialDate> SpecialDates
-        {
-            get => Days.SpecialDates;
-            set => Days.SpecialDates = value;
-        }
 
         public override async Task OnPreRender()
         {
             await base.OnPreRender();
-            await ChangeCalendar();
+            await Change();
         }
 
-        async Task ChangeCalendar()
+        async Task Change()
         {
             Header.TitleText = StartDate.ToString("MMM yyyy");
 
             var start = CalendarHelpers.GetCalendarStartDate(StartDate, StartDay);
 
-            Days.StartDate = StartDate;
+            Days.Attributes.StartDate = StartDate;
 
             if (LimitSelectionToRange)
             {
                 Header.PreviousEnabled = !(MinDate.HasValue && CalendarHelpers.GetCalendarStartDate(StartDate, StartDay) < MinDate);
                 Header.NextEnabled = !(MaxDate.HasValue && start > MaxDate);
             }
+            
             await Add(MainView);
         }
 
-        bool lockScope;
         public bool LockScope
         {
             get => lockScope;
@@ -134,7 +128,7 @@
         void Header_NextTapped()
         {
             if (Scope == CalendarScope.Years)
-                startDate = Years.NextPage();
+                startDate = Years.NextPage().GetAwaiter().GetResult();
             else
                 startDate = Days.NextPage();
             
@@ -144,14 +138,12 @@
         void Header_PreviousTapped()
         {
             if (Scope == CalendarScope.Years)
-                startDate = Years.PreviousPage();
+                startDate = Years.PreviousPage().GetAwaiter().GetResult();
             else
                 startDate = Days.PreviousPage();
             Header.TitleText = StartDate.ToString("MMM yyyy");
         }
 
-        ///
-        /// MonthYearView
         async Task ChangeScope(bool nextScope)
         {
             if (TemporatyView == null)
@@ -216,7 +208,7 @@
             Header.PreviousVisible = Header.NextVisible = true;
             await ItemsContainer.ClearChildren();
             await ReAddToContentView();
-            await ChangeCalendar();
+            await Change();
         }
 
         async Task GoToMonths()
@@ -226,7 +218,7 @@
             {
                 if (!LockScope)
                 {
-                    StartDate = args;
+                    startDate = args;
                     await ChangeScope(nextScope: false);
                 }
             });
@@ -244,7 +236,7 @@
             {
                 if (!LockScope)
                 {
-                    StartDate = args;
+                    startDate = args;
                     await ChangeScope(nextScope: false);
                 }
             });

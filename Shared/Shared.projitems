@@ -16,8 +16,10 @@
     <None Include="$(MSBuildThisFileDirectory)NuGet\Icon.png" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AnimationHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Calendar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Calendar.SpecialDate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CalendarAttributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DaysView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HeaderView.cs" />

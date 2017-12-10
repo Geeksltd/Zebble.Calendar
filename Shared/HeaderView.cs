@@ -1,98 +1,99 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Zebble
 {
-    class HeaderView : Stack
+    partial class Calendar
     {
-        private TextView Title;
-        private TextView Previous;
-        private TextView Next;
-
-        public AsyncEvent TitleTapped;
-        public AsyncEvent PreviousTapped;
-        public AsyncEvent NextTapped;
-
-        public string TitleText
+        class HeaderView : Stack
         {
-            get => Title.Text;
-            set => Title.Text = value ?? Title.Text;
-        }
+            private TextView Title;
+            private TextView Previous;
+            private TextView Next;
 
-        public string PreviousText
-        {
-            get => Previous.Text;
-            set => Previous.Text = value ?? Previous.Text;
-        }
+            public AsyncEvent TitleTapped;
+            public AsyncEvent PreviousTapped;
+            public AsyncEvent NextTapped;
 
-        public string NextText
-        {
-            get => Next.Text;
-            set => Next.Text = value ?? Next.Text;
-        }
+            public string TitleText
+            {
+                get => Title.Text;
+                set => Title.Text = value ?? Title.Text;
+            }
 
-        public bool TitleEnabled
-        {
-            get => Title.Enabled;
-            set => Title.Enabled = value;
-        }
+            public string PreviousText
+            {
+                get => Previous.Text;
+                set => Previous.Text = value ?? Previous.Text;
+            }
 
-        public bool PreviousEnabled
-        {
-            get => Previous.Enabled;
-            set => Previous.Enabled = value;
-        }
+            public string NextText
+            {
+                get => Next.Text;
+                set => Next.Text = value ?? Next.Text;
+            }
 
-        public bool NextEnabled
-        {
-            get => Next.Enabled;
-            set => Next.Enabled = value;
-        }
+            public bool TitleEnabled
+            {
+                get => Title.Enabled;
+                set => Title.Enabled = value;
+            }
 
-        public bool TitleVisible
-        {
-            get => Title.Visible;
-            set => Title.Visible = value;
-        }
+            public bool PreviousEnabled
+            {
+                get => Previous.Enabled;
+                set => Previous.Enabled = value;
+            }
 
-        public bool PreviousVisible
-        {
-            get => Previous.Visible;
-            set => Previous.Visible = value;
-        }
+            public bool NextEnabled
+            {
+                get => Next.Enabled;
+                set => Next.Enabled = value;
+            }
 
-        public bool NextVisible
-        {
-            get => Next.Visible;
-            set => Next.Visible = value;
-        }
+            public bool TitleVisible
+            {
+                get => Title.Visible;
+                set => Title.Visible = value;
+            }
 
-        public HeaderView()
-        {
-            Direction = RepeatDirection.Horizontal;
-            Id = "Header";
+            public bool PreviousVisible
+            {
+                get => Previous.Visible;
+                set => Previous.Visible = value;
+            }
 
-            Previous = new TextView { Text = "❰", Id = "Previous" };
-            Title = new TextView { Id = "Title" };
-            Next = new TextView { Text = "❱", Id = "Next" };
+            public bool NextVisible
+            {
+                get => Next.Visible;
+                set => Next.Visible = value;
+            }
 
-            TitleTapped = new AsyncEvent();
-            PreviousTapped = new AsyncEvent();
-            NextTapped = new AsyncEvent();
+            public HeaderView()
+            {
+                Direction = RepeatDirection.Horizontal;
+                Id = "Header";
 
-            Title.Tapped.HandleWith(() => TitleTapped.Raise());
-            Previous.Tapped.HandleWith(() => PreviousTapped.Raise());
-            Next.Tapped.HandleWith(() => NextTapped.Raise());
-        }
+                Previous = new TextView { Text = "❰", Id = "Previous" };
+                Title = new TextView { Id = "Title" };
+                Next = new TextView { Text = "❱", Id = "Next" };
 
-        public override async Task OnInitializing()
-        {
-            await base.OnInitializing();
-            await Add(Previous);
-            await Add(Title);
-            await Add(Next);
+                TitleTapped = new AsyncEvent();
+                PreviousTapped = new AsyncEvent();
+                NextTapped = new AsyncEvent();
+
+                Title.Tapped.HandleWith(() => TitleTapped.Raise());
+                Previous.Tapped.HandleWith(() => PreviousTapped.Raise());
+                Next.Tapped.HandleWith(() => NextTapped.Raise());
+            }
+
+            public override async Task OnInitializing()
+            {
+                await base.OnInitializing();
+                await Add(Previous);
+                await Add(Title);
+                await Add(Next);
+            }
         }
     }
+    
 }

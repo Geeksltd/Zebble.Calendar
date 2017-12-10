@@ -1,232 +1,209 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Zebble
 {
-    class DaysView : Grid
+    partial class Calendar
     {
-        List<Calendar.ItemButton> Buttons;
-
-        public bool MultiSelectable { set; get; } = false;
-
-        public List<DateTime> SelectedDates { set; get; } = new List<DateTime>(1);
-
-        DateTime startDate = DateTime.Today;
-        public DateTime StartDate
+        class DaysView : View
         {
-            get => startDate;
-            set
+            DaysGrid MainGrid;
+
+            public CalendarAttributes Attributes { set; get; }
+
+            public DaysView(CalendarAttributes attributes)
             {
-                startDate = value.Date;
-                Update();
+                Attributes = attributes;
+                Attributes.AttributeChanged.Handle(async type => await AttributesChanged(type));
+                MainGrid = GetNewGrid();
+                Add(MainGrid);
             }
-        }
 
-        private DateTime? maxDate;
-
-        public DateTime? MaxDate
-        {
-            get => maxDate;
-            set
+            public async Task NavigateTo(DaysGrid days, AnimationType animationType)
             {
-                maxDate = value;
-                Update();
+                await new AnimationHelper(this, MainGrid, days, animationType).Run();
+                await Remove(MainGrid);
+                MainGrid = days;
             }
-        }
 
-        private DateTime? minDate;
 
-        public DateTime? MinDate
-        {
-            get => minDate;
-            set
+            public DateTime NextPage()
             {
-                minDate = value;
-                Update();
+                var result = new DateTime(Attributes.StartDate.Year, Attributes.StartDate.Month, 1).AddMonths(Attributes.MonthsToShow);
+                Attributes.StartDate = result;
+                return result;
             }
-        }
 
-        ////Selected Dates
-        DateTime? selectedDate = null;
-        public DateTime? SelectedDate
-        {
-            get => selectedDate;
-            set
+            public DateTime PreviousPage()
             {
-                selectedDate = value?.Date;
-                if (ChangeSelectedDate(selectedDate)) selectedDate = null;
+                var result = new DateTime(Attributes.StartDate.Year, Attributes.StartDate.Month, 1).AddMonths(-Attributes.MonthsToShow);
+                Attributes.StartDate = result;
+                return result;
             }
-        }
 
-        DayOfWeek startDay = DayOfWeek.Sunday;
-
-        public DayOfWeek StartDay
-        {
-            get => startDay;
-            set
+            async Task AttributesChanged(AttributeChangeType change)
             {
-                startDay = value;
-                Update();
-            }
-        }
-
-        List<Calendar.SpecialDate> specialDates = new List<Calendar.SpecialDate>();
-        public List<Calendar.SpecialDate> SpecialDates
-        {
-            get => specialDates;
-            set { Update(); specialDates = value; }
-        }
-
-        int monthsToShow = 1;
-        public int MonthsToShow
-        {
-            get { return monthsToShow; }
-            set { Update(); monthsToShow = value; }
-        }
-
-        public DaysView()
-        {
-            Columns = CalendarHelpers.WEEK_DAYS;
-            Buttons = new List<Calendar.ItemButton>(CalendarHelpers.DAYS_IN_MONTH_VIEW);
-            CreateButtons();
-            Update();
-        }
-
-        public int ButtonCount => Buttons.Count;
-
-        public DateTime NextPage()
-        {
-            StartDate = new DateTime(StartDate.Year, StartDate.Month, 1).AddMonths(MonthsToShow);
-            return StartDate;
-        }
-
-        public DateTime PreviousPage()
-        {
-            StartDate = new DateTime(StartDate.Year, StartDate.Month, 1).AddMonths(-MonthsToShow);
-            return StartDate;
-        }
-
-
-        async Task CreateButtons()
-        {
-            for (var row = 0; row < CalendarHelpers.MAX_WEEK_IN_MONTH; row++)
-            {
-                for (var column = 0; column < CalendarHelpers.WEEK_DAYS; column++)
+                switch (change)
                 {
-                    var button = new Calendar.ItemButton()
-                    {
-                        Id = "Day"
-                    };
-
-                    Buttons.Add(button);
-                    var lastButton = Buttons.Last();
-                    lastButton.Tapped.Handle(ItemButtonTapped);
-
-                    await Add(button);
+                    case AttributeChangeType.NextPage:
+                        await NavigateTo(GetNewGrid(), AnimationType.NextPage);
+                        break;
+                    case AttributeChangeType.PreviousPage:
+                        await NavigateTo(GetNewGrid(), AnimationType.PreviousPage);
+                        break;
+                    default:
+                        await NavigateTo(GetNewGrid(), AnimationType.Change);
+                        break;
                 }
             }
-            await EnsureFullColumns();
+
+            DaysGrid GetNewGrid() => new DaysGrid(Attributes);
         }
 
-
-
-        public async Task Update()
+        class DaysGrid : Grid
         {
-            var start = CalendarHelpers.GetCalendarStartDate(StartDate, StartDay);
-            var beginOfMonth = false;
-            var endOfMonth = false;
+            List<ItemButton> Buttons;
 
-            for (var i = 0; i < Buttons.Count; i++)
+            CalendarAttributes Attributes;
+
+            public DaysGrid(CalendarAttributes attributes)
             {
-                endOfMonth |= beginOfMonth && start.Day == 1;
-                beginOfMonth |= start.Day == 1;
+                Attributes = attributes.Clone();
+                Columns = CalendarHelpers.WEEK_DAYS;
+                Buttons = new List<Calendar.ItemButton>(CalendarHelpers.DAYS_IN_MONTH_VIEW);
+                CreateButtons();
+                Update();
+            }
 
-                Buttons[i].Text = $"{start.Day}";
-                Buttons[i].Date = start;
-                Buttons[i].OutOfMonth = !(beginOfMonth && !endOfMonth);
-                Buttons[i].Enabled = MonthsToShow == 1 || !Buttons[i].OutOfMonth;
-
-                var specialDate = SpecialDates?.FirstOrDefault(s => s.Date == start);
-
-                Unselect(Buttons[i]);
-
-                if (start < MinDate || start > MaxDate) Buttons[i].SetDisabled();
-                else if (Buttons[i].Enabled && SelectedDates.Contains(start))
-                    Buttons[i].Select();
-                else if (specialDate != null) Buttons[i].Enabled = specialDate.Selectable;
-
-                start = start.AddDays(1);
-                if (i != 0)
+            DateTime? SelectedDate
+            {
+                get => Attributes.SelectedDate;
+                set
                 {
-                    if ((i + 1) % CalendarHelpers.DAYS_IN_MONTH_VIEW == 0)
+                    Attributes.SelectedDate = value?.Date;
+                    if (ChangeSelectedDate(Attributes.SelectedDate)) Attributes.SelectedDate = null;
+                }
+            }
+
+            async Task CreateButtons()
+            {
+                for (var row = 0; row < CalendarHelpers.MAX_WEEK_IN_MONTH; row++)
+                {
+                    for (var column = 0; column < CalendarHelpers.WEEK_DAYS; column++)
                     {
-                        beginOfMonth = false;
-                        endOfMonth = false;
-                        start = CalendarHelpers.GetCalendarStartDate(start, StartDay);
+                        var button = new Calendar.ItemButton()
+                        {
+                            Id = "Day"
+                        };
+
+                        Buttons.Add(button);
+                        var lastButton = Buttons.Last();
+                        lastButton.Tapped.Handle(ItemButtonTapped);
+
+                        await Add(button);
+                    }
+                }
+                await EnsureFullColumns();
+            }
+
+            public void Update()
+            {
+                var start = CalendarHelpers.GetCalendarStartDate(Attributes.StartDate, Attributes.StartDay);
+                var beginOfMonth = false;
+                var endOfMonth = false;
+
+                for (var i = 0; i < Buttons.Count; i++)
+                {
+                    endOfMonth |= beginOfMonth && start.Day == 1;
+                    beginOfMonth |= start.Day == 1;
+
+                    Buttons[i].Text = $"{start.Day}";
+                    Buttons[i].Date = start;
+                    Buttons[i].OutOfMonth = !(beginOfMonth && !endOfMonth);
+                    Buttons[i].Enabled = Attributes.MonthsToShow == 1 || !Buttons[i].OutOfMonth;
+
+                    var specialDate = Attributes.SpecialDates?.FirstOrDefault(s => s.Date == start);
+
+                    Unselect(Buttons[i]);
+
+                    if (start < Attributes.MinDate || start > Attributes.MaxDate) Buttons[i].SetDisabled();
+                    else if (Buttons[i].Enabled && Attributes.SelectedDates.Contains(start))
+                        Buttons[i].Select();
+                    else if (specialDate != null) Buttons[i].Enabled = specialDate.Selectable;
+
+                    start = start.AddDays(1);
+                    if (i != 0)
+                    {
+                        if ((i + 1) % CalendarHelpers.DAYS_IN_MONTH_VIEW == 0)
+                        {
+                            beginOfMonth = false;
+                            endOfMonth = false;
+                            start = CalendarHelpers.GetCalendarStartDate(start, Attributes.StartDay);
+                        }
                     }
                 }
             }
-        }
 
 
 
-        Task ItemButtonTapped(TouchEventArgs args)
-        {
-            var item = args.View as Calendar.ItemButton;
-
-            var selectedDate = item.Date;
-            if (SelectedDate.HasValue && selectedDate.HasValue && SelectedDate == selectedDate)
+            Task ItemButtonTapped(TouchEventArgs args)
             {
-                ChangeSelectedDate(selectedDate);
-                SelectedDate = null;
-            }
-            else SelectedDate = selectedDate;
+                var item = args.View as ItemButton;
 
-            return Task.CompletedTask;
-        }
+                var selectedDate = item.Date;
+                if (SelectedDate.HasValue && selectedDate.HasValue && SelectedDate == selectedDate)
+                {
+                    ChangeSelectedDate(selectedDate);
+                    SelectedDate = null;
+                }
+                else SelectedDate = selectedDate;
 
-        protected void Unselect(Calendar.ItemButton button)
-        {
-            button.Selected = false;
-            button.Enabled = MonthsToShow == 1 || !button.OutOfMonth;
-        }
-
-        private bool ChangeSelectedDate(DateTime? date)
-        {
-            if (date == null) return false;
-
-            if (!MultiSelectable)
-            {
-                Buttons.FindAll(b => b.Selected).ForEach(b => ResetButton(b));
-                SelectedDates.Clear();
+                return Task.CompletedTask;
             }
 
-            SelectedDates.Add(SelectedDate.Value);
-
-            var button = Buttons.FirstOrDefault(b => b.Date == date && b.Enabled);
-            if (button == null) return false;
-
-            var deselect = button.Selected;
-            if (button.Selected) ResetButton(button);
-            else
+            protected void Unselect(ItemButton button)
             {
-                SelectedDates.Add(SelectedDate.Value);
-                button.Select();
+                button.Selected = false;
+                button.Enabled = Attributes.MonthsToShow == 1 || !button.OutOfMonth;
             }
 
-            return deselect;
-        }
+            private bool ChangeSelectedDate(DateTime? date)
+            {
+                if (date == null) return false;
 
-        protected void ResetButton(Calendar.ItemButton button)
-        {
-            if (button.Date.HasValue) SelectedDates.Remove(button.Date.Value);
-            var spD = SpecialDates?.FirstOrDefault(s => s.Date == button.Date);
-            Unselect(button);
-            if (spD != null) button.Enabled = spD.Selectable;
-        }
+                if (!Attributes.MultiSelectable)
+                {
+                    Buttons.FindAll(b => b.Selected).ForEach(b => ResetButton(b));
+                    Attributes.SelectedDates.Clear();
+                }
 
+                Attributes.SelectedDates.Add(SelectedDate.Value);
+
+                var button = Buttons.FirstOrDefault(b => b.Date == date && b.Enabled);
+                if (button == null) return false;
+
+                var deselect = button.Selected;
+                if (button.Selected) ResetButton(button);
+                else
+                {
+                    Attributes.SelectedDates.Add(SelectedDate.Value);
+                    button.Select();
+                }
+
+                return deselect;
+            }
+
+            protected void ResetButton(ItemButton button)
+            {
+                if (button.Date.HasValue) Attributes.SelectedDates.Remove(button.Date.Value);
+                var spD = Attributes.SpecialDates?.FirstOrDefault(s => s.Date == button.Date);
+                Unselect(button);
+                if (spD != null) button.Enabled = spD.Selectable;
+            }
+
+        }
     }
+
 }

@@ -1,54 +1,55 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Zebble
 {
-    public class MonthsView : Grid
+    partial class Calendar
     {
-        DateTime startDate;
-
-        public AsyncEvent<DateTime> MonthTapped;
-
-        public MonthsView() : this(DateTime.Now) {}
-
-        public MonthsView(DateTime start)
+        class MonthsView : Grid
         {
-            Columns = 3;
-            MonthTapped = new AsyncEvent<DateTime>();
-            StartDate = start;
-        }
+            DateTime startDate;
 
-        public DateTime StartDate
-        {
-            get => startDate;
-            set
+            public AsyncEvent<DateTime> MonthTapped;
+
+            public MonthsView() : this(DateTime.Now) { }
+
+            public MonthsView(DateTime start)
             {
-                startDate = value.Date;
-                Update();
+                Columns = 3;
+                MonthTapped = new AsyncEvent<DateTime>();
+                StartDate = start;
             }
-        }
 
-        async Task Update()
-        {
-            for (var row = 0; row < 4; row++)
+            public DateTime StartDate
             {
-                for (var column = 0; column < 3; column++)
+                get => startDate;
+                set
                 {
-                    var button = new Calendar.ItemButton
-                    {
-                        Text = DateTimeFormatInfo.CurrentInfo.MonthNames[(row * 3) + column],
-                        Date = new DateTime(StartDate.Year, (row * 3) + column + 1, 1),
-                        Id = "Month"
-                    };
-
-                    button.Tapped.HandleWith(() => MonthTapped.Raise(button.Date.Value));
-                    await Add(button);
+                    startDate = value.Date;
+                    Update();
                 }
             }
-        }
 
+            async Task Update()
+            {
+                for (var row = 0; row < 4; row++)
+                {
+                    for (var column = 0; column < 3; column++)
+                    {
+                        var button = new Calendar.ItemButton
+                        {
+                            Text = DateTimeFormatInfo.CurrentInfo.MonthNames[(row * 3) + column],
+                            Date = new DateTime(StartDate.Year, (row * 3) + column + 1, 1),
+                            Id = "Month"
+                        };
+
+                        button.Tapped.HandleWith(() => MonthTapped.Raise(button.Date.Value));
+                        await Add(button);
+                    }
+                }
+            }
+
+        }
     }
 }

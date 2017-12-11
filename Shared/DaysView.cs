@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,7 +14,7 @@ namespace Zebble
 
             public CalendarAttributes Attributes { set; get; }
 
-            public DaysView(CalendarAttributes attributes)
+            private DaysView(CalendarAttributes attributes)
             {
                 Attributes = attributes;
                 Attributes.AttributeChanged.Handle(async type => await AttributesChanged(type));
@@ -21,7 +22,10 @@ namespace Zebble
                 Add(MainGrid);
             }
 
-            public async Task NavigateTo(DaysGrid days, AnimationType animationType)
+            public static DaysView CreateInstance(CalendarAttributes attributes) => new DaysView(attributes);
+
+
+            async Task NavigateTo(DaysGrid days, AnimationType animationType)
             {
                 await new AnimationHelper(this, MainGrid, days, animationType).Run();
                 await Remove(MainGrid);
@@ -59,7 +63,7 @@ namespace Zebble
                 }
             }
 
-            DaysGrid GetNewGrid() => new DaysGrid(Attributes);
+            DaysGrid GetNewGrid() => DaysGrid.CreateInstance(Attributes);
         }
 
         class DaysGrid : Grid
@@ -68,7 +72,7 @@ namespace Zebble
 
             CalendarAttributes Attributes;
 
-            public DaysGrid(CalendarAttributes attributes)
+            private DaysGrid(CalendarAttributes attributes)
             {
                 Attributes = attributes.Clone();
                 Columns = CalendarHelpers.WEEK_DAYS;
@@ -76,6 +80,8 @@ namespace Zebble
                 CreateButtons();
                 Update();
             }
+
+            public static DaysGrid CreateInstance(CalendarAttributes attributes) => new DaysGrid(attributes);
 
             DateTime? SelectedDate
             {

@@ -12,7 +12,7 @@ namespace Zebble
             DateTime StartDate;
             public AsyncEvent<DateTime> YearTapped;
 
-            public YearsView(DateTime start)
+            private YearsView(DateTime start)
             {
                 MainGrid = new YearsGrid(start);
                 YearTapped = new AsyncEvent<DateTime>();
@@ -20,12 +20,16 @@ namespace Zebble
                 StartDate = start;
                 Add(MainGrid);
             }
-            public async Task NavigateTo(YearsGrid years, AnimationType animationType)
+
+            public static YearsView CreateInstance(DateTime start) => new YearsView(start);
+
+            async Task NavigateTo(YearsGrid years, AnimationType animationType)
             {
                 await new AnimationHelper(this, MainGrid, years, animationType).Run();
                 await Remove(MainGrid);
                 MainGrid = years;
             }
+
             public async Task<DateTime> NextPage()
             {
                 var years = new YearsGrid(StartDate);

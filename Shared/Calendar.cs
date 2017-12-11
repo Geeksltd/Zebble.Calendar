@@ -38,7 +38,7 @@
             Header.NextTapped.HandleWith(Header_NextTapped);
             Header.TitleTapped.Handle(() => ChangeScope(nextScope: true));
 
-            Days = new DaysView(new CalendarAttributes {StartDate = startDate});
+            Days = DaysView.CreateInstance(new CalendarAttributes { StartDate = startDate });
             WeekDays = new WeekDaysView();
         }
 
@@ -111,7 +111,7 @@
                 Header.PreviousEnabled = !(MinDate.HasValue && CalendarHelpers.GetCalendarStartDate(StartDate, StartDay) < MinDate);
                 Header.NextEnabled = !(MaxDate.HasValue && start > MaxDate);
             }
-            
+
             await Add(MainView);
         }
 
@@ -131,7 +131,7 @@
                 startDate = Years.NextPage().GetAwaiter().GetResult();
             else
                 startDate = Days.NextPage();
-            
+
             Header.TitleText = StartDate.ToString("MMM yyyy");
         }
 
@@ -231,7 +231,7 @@
 
         async Task GoToYears()
         {
-            Years = new YearsView(StartDate);
+            Years = YearsView.CreateInstance(StartDate);
             Years.YearTapped.Handle(async args =>
             {
                 if (!LockScope)

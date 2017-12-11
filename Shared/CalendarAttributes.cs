@@ -116,8 +116,8 @@ namespace Zebble
                 get => selectedDates;
             }
 
-            List<Calendar.SpecialDate> specialDates = new List<Calendar.SpecialDate>();
-            public List<Calendar.SpecialDate> SpecialDates
+            List<SpecialDate> specialDates = new List<SpecialDate>();
+            public List<SpecialDate> SpecialDates
             {
                 set
                 {
@@ -129,7 +129,7 @@ namespace Zebble
 
             public CalendarAttributes Clone()
             {
-                return new CalendarAttributes()
+                return new CalendarAttributes
                 {
                     AttributeChanged = new AsyncEvent<AttributeChangeType>(),
                     StartDate = this.StartDate,

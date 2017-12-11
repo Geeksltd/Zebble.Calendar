@@ -22,9 +22,6 @@ namespace Zebble
             }
             public async Task Run()
             {
-                (FromView as Page).Perform(x => x.IsNavigatedAwayFrom = ParentView == View.Root);
-                (ToView as Page).Perform(x => x.IsNavigatedAwayFrom = false);
-
                 switch (Type)
                 {
                     case AnimationType.NextPage: await SlideForward(); break;
@@ -39,22 +36,22 @@ namespace Zebble
             {
                 if (ToView != ParentView)
                     EnterAnimation = await ParentView.AddWithAnimation(ToView,
-                        m => m.Y(0).X(Device.Screen.Width),
+                        m => m.Y(0).X(ParentView.ActualWidth),
                         m => m.X(0));
 
                 if (FromView != ParentView)
-                    ExitAnimation = Animation.Create(FromView, x => x.X(-Device.Screen.Width));
+                    ExitAnimation = Animation.Create(FromView, x => x.X(-ParentView.ActualWidth));
             }
 
             async Task SlideBack()
             {
                 if (ToView != ParentView)
                     EnterAnimation = await ParentView.AddWithAnimation(ToView,
-                        m => m.Y(0).X(-Device.Screen.Width),
+                        m => m.Y(0).X(-ParentView.ActualWidth),
                         m => m.X(0));
 
                 if (FromView != ParentView)
-                    ExitAnimation = Animation.Create(FromView, x => x.X(Device.Screen.Width));
+                    ExitAnimation = Animation.Create(FromView, x => x.X(ParentView.ActualWidth));
             }
 
             async Task Fade()

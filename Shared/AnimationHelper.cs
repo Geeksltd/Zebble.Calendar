@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Zebble
@@ -9,7 +7,7 @@ namespace Zebble
     {
         class AnimationHelper
         {
-            Animation EnterAnimation = null, ExitAnimation = null;
+            Animation EnterAnimation, ExitAnimation;
             View ParentView, FromView, ToView;
             AnimationType Type;
             const int NEXT_DURATION = 1000;
@@ -85,9 +83,6 @@ namespace Zebble
                 }
                 else if (ExitAnimation != null) await FromView.Animate(ExitAnimation);
             }
-
         }
-
     }
-    
 }

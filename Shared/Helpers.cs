@@ -17,8 +17,8 @@ namespace Zebble
                 start = start.AddDays(-1);
                 beginOfMonth |= start.Day == 1;
             }
+
             return start;
         }
-
     }
 }

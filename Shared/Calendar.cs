@@ -39,7 +39,7 @@
             Header.TitleTapped.Handle(() => ChangeScope(nextScope: true));
 
             Days = DaysView.CreateInstance(new CalendarAttributes { StartDate = startDate });
-            WeekDays = new WeekDaysView();
+            WeekDays = WeekDaysView.CreateInstance();
         }
 
         public override async Task OnInitializing()
@@ -76,13 +76,13 @@
         public DateTime StartDate
         {
             get => startDate;
-            set { startDate = value.Date; Change(); }
+            set { startDate = value.Date; Change().RunInParallel(); }
         }
 
         public DayOfWeek StartDay
         {
             get => startDay;
-            set { startDay = value; Change(); }
+            set { startDay = value; Change().RunInParallel(); }
         }
 
         public int MonthsToShow
@@ -90,7 +90,6 @@
             get => Days.Attributes.MonthsToShow;
             set => Days.Attributes.MonthsToShow = value;
         }
-
 
         public override async Task OnPreRender()
         {
@@ -127,20 +126,14 @@
 
         void Header_NextTapped()
         {
-            if (Scope == CalendarScope.Years)
-                startDate = Years.NextPage().GetAwaiter().GetResult();
-            else
-                startDate = Days.NextPage();
+            startDate = Scope == CalendarScope.Years ? Years.NextPage().GetAwaiter().GetResult() : Days.NextPage();
 
             Header.TitleText = StartDate.ToString("MMM yyyy");
         }
 
         void Header_PreviousTapped()
         {
-            if (Scope == CalendarScope.Years)
-                startDate = Years.PreviousPage().GetAwaiter().GetResult();
-            else
-                startDate = Days.PreviousPage();
+            startDate = Scope == CalendarScope.Years ? Years.PreviousPage().GetAwaiter().GetResult() : Days.PreviousPage();
             Header.TitleText = StartDate.ToString("MMM yyyy");
         }
 
@@ -150,6 +143,7 @@
             {
                 await CloneAndClearContentView();
             }
+
             switch (Scope)
             {
                 case CalendarScope.Days:
@@ -213,7 +207,7 @@
 
         async Task GoToMonths()
         {
-            var months = new MonthsView(StartDate);
+            var months = MonthsView.CreateInstance(StartDate);
             months.MonthTapped.Handle(async args =>
             {
                 if (!LockScope)

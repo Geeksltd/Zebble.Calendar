@@ -12,23 +12,19 @@ namespace Zebble
 
             public AsyncEvent<DateTime> MonthTapped;
 
-            public MonthsView() : this(DateTime.Now) { }
-
-            public MonthsView(DateTime start)
+            private MonthsView(DateTime start)
             {
                 Columns = 3;
                 MonthTapped = new AsyncEvent<DateTime>();
-                StartDate = start;
+                ChangeStartDate(start);
             }
 
-            public DateTime StartDate
+            public static MonthsView CreateInstance(DateTime start) => new MonthsView(start);
+
+            public async Task ChangeStartDate(DateTime start)
             {
-                get => startDate;
-                set
-                {
-                    startDate = value.Date;
-                    Update();
-                }
+                startDate = start;
+                await Update();
             }
 
             async Task Update()
@@ -40,7 +36,7 @@ namespace Zebble
                         var button = new Calendar.ItemButton
                         {
                             Text = DateTimeFormatInfo.CurrentInfo.MonthNames[(row * 3) + column],
-                            Date = new DateTime(StartDate.Year, (row * 3) + column + 1, 1),
+                            Date = new DateTime(startDate.Year, (row * 3) + column + 1, 1),
                             Id = "Month"
                         };
 
@@ -49,7 +45,6 @@ namespace Zebble
                     }
                 }
             }
-
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Zebble
 
             private YearsView(DateTime start)
             {
-                MainGrid = new YearsGrid(start);
+                MainGrid = YearsGrid.CreateInstance(start);
                 YearTapped = new AsyncEvent<DateTime>();
                 MainGrid.YearTapped.Handle(date => YearTapped.Raise(date));
                 StartDate = start;
@@ -32,14 +32,14 @@ namespace Zebble
 
             public async Task<DateTime> NextPage()
             {
-                var years = new YearsGrid(StartDate);
+                var years = YearsGrid.CreateInstance(StartDate);
                 var result = years.NextPage();
                 await NavigateTo(years, AnimationType.NextPage);
                 return result;
             }
             public async Task<DateTime> PreviousPage()
             {
-                var years = new YearsGrid(StartDate);
+                var years = YearsGrid.CreateInstance(StartDate);
                 var result = years.PreviousPage();
                 await NavigateTo(years, AnimationType.PreviousPage);
                 return result;
@@ -48,24 +48,26 @@ namespace Zebble
 
         class YearsGrid : Grid
         {
-            private DateTime startDate;
-            List<Calendar.ItemButton> YearButtons;
+            DateTime startDate;
+            List<ItemButton> YearButtons;
             public AsyncEvent<DateTime> YearTapped;
-            public int YearRows { get; set; } = 4;
-            public int YearColumns { get; set; } = 4;
+            int YearRows = 4;
+            int YearColumns = 4;
 
-            public YearsGrid(DateTime start)
+            private YearsGrid(DateTime start)
             {
                 Columns = YearColumns;
                 YearTapped = new AsyncEvent<DateTime>();
-                YearButtons = new List<Calendar.ItemButton>();
+                YearButtons = new List<ItemButton>();
                 ChangeDate(start);
             }
 
-            public void ChangeDate(DateTime newDate)
+            public static YearsGrid CreateInstance(DateTime start) => new YearsGrid(start);
+
+            public async Task ChangeDate(DateTime newDate)
             {
                 startDate = newDate.Date;
-                Update();
+                await Update();
             }
 
             async Task Update()

@@ -28,7 +28,6 @@ namespace Zebble
                         startDate = value;
                         AttributeChanged.Raise(AttributeChangeType.StartDate);
                     }
-
                 }
                 get => startDate;
             }
@@ -69,7 +68,7 @@ namespace Zebble
                 get => startDay;
             }
 
-            DateTime? selectedDate = null;
+            DateTime? selectedDate;
             public DateTime? SelectedDate
             {
                 set
@@ -93,7 +92,7 @@ namespace Zebble
                 get => monthsToShow;
             }
 
-            bool multiSelectable = false;
+            bool multiSelectable;
             public bool MultiSelectable
             {
                 set
@@ -132,18 +131,17 @@ namespace Zebble
                 return new CalendarAttributes
                 {
                     AttributeChanged = new AsyncEvent<AttributeChangeType>(),
-                    StartDate = this.StartDate,
-                    MaxDate = this.MaxDate,
-                    MinDate = this.MinDate,
-                    MonthsToShow = this.MonthsToShow,
-                    MultiSelectable = this.MultiSelectable,
-                    SelectedDate = this.SelectedDate,
-                    StartDay = this.StartDay,
-                    SelectedDates = this.SelectedDates.Clone(),
-                    SpecialDates = this.SpecialDates.Clone()
+                    StartDate = StartDate,
+                    MaxDate = MaxDate,
+                    MinDate = MinDate,
+                    MonthsToShow = MonthsToShow,
+                    MultiSelectable = MultiSelectable,
+                    SelectedDate = SelectedDate,
+                    StartDay = StartDay,
+                    SelectedDates = SelectedDates.Clone(),
+                    SpecialDates = SpecialDates.Clone()
                 };
             }
-
         }
     }
 }

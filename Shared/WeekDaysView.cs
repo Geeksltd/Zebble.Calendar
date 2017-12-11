@@ -41,13 +41,15 @@ namespace Zebble
                 set { showWeekdays = value; Update(); }
             }
 
-            public WeekDaysView()
+            private WeekDaysView()
             {
                 Direction = RepeatDirection.Horizontal; Id = "WeekdaysContainer";
                 WeekDayLabels = new List<TextView>();
                 Create();
                 Update();
             }
+
+            public static WeekDaysView CreateInstance() => new WeekDaysView();
 
             async Task Create()
             {
@@ -62,7 +64,7 @@ namespace Zebble
             {
                 if (!ShowWeekdays) return;
                 var start = CalendarHelpers.GetCalendarStartDate(StartDate, StartDay);
-                foreach (var label in this.WeekDayLabels)
+                foreach (var label in WeekDayLabels)
                 {
                     label.Text = start.ToString(WeekdayFormat);
                     start = start.AddDays(1);
@@ -70,5 +72,4 @@ namespace Zebble
             }
         }
     }
-    
 }

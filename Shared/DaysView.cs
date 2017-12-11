@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,14 +23,12 @@ namespace Zebble
 
             public static DaysView CreateInstance(CalendarAttributes attributes) => new DaysView(attributes);
 
-
             async Task NavigateTo(DaysGrid days, AnimationType animationType)
             {
                 await new AnimationHelper(this, MainGrid, days, animationType).Run();
                 await Remove(MainGrid);
                 MainGrid = days;
             }
-
 
             public DateTime NextPage()
             {
@@ -76,7 +73,7 @@ namespace Zebble
             {
                 Attributes = attributes.Clone();
                 Columns = CalendarHelpers.WEEK_DAYS;
-                Buttons = new List<Calendar.ItemButton>(CalendarHelpers.DAYS_IN_MONTH_VIEW);
+                Buttons = new List<ItemButton>(CalendarHelpers.DAYS_IN_MONTH_VIEW);
                 CreateButtons();
                 Update();
             }
@@ -99,7 +96,7 @@ namespace Zebble
                 {
                     for (var column = 0; column < CalendarHelpers.WEEK_DAYS; column++)
                     {
-                        var button = new Calendar.ItemButton()
+                        var button = new ItemButton()
                         {
                             Id = "Day"
                         };
@@ -111,10 +108,11 @@ namespace Zebble
                         await Add(button);
                     }
                 }
+
                 await EnsureFullColumns();
             }
 
-            public void Update()
+            void Update()
             {
                 var start = CalendarHelpers.GetCalendarStartDate(Attributes.StartDate, Attributes.StartDay);
                 var beginOfMonth = false;
@@ -152,13 +150,11 @@ namespace Zebble
                 }
             }
 
-
-
             Task ItemButtonTapped(TouchEventArgs args)
             {
                 var item = args.View as ItemButton;
 
-                var selectedDate = item.Date;
+                var selectedDate = item?.Date;
                 if (SelectedDate.HasValue && selectedDate.HasValue && SelectedDate == selectedDate)
                 {
                     ChangeSelectedDate(selectedDate);
@@ -169,19 +165,19 @@ namespace Zebble
                 return Task.CompletedTask;
             }
 
-            protected void Unselect(ItemButton button)
+            void Unselect(ItemButton button)
             {
                 button.Selected = false;
                 button.Enabled = Attributes.MonthsToShow == 1 || !button.OutOfMonth;
             }
 
-            private bool ChangeSelectedDate(DateTime? date)
+            bool ChangeSelectedDate(DateTime? date)
             {
                 if (date == null) return false;
 
                 if (!Attributes.MultiSelectable)
                 {
-                    Buttons.FindAll(b => b.Selected).ForEach(b => ResetButton(b));
+                    Buttons.FindAll(b => b.Selected).ForEach(ResetButton);
                     Attributes.SelectedDates.Clear();
                 }
 
@@ -201,15 +197,13 @@ namespace Zebble
                 return deselect;
             }
 
-            protected void ResetButton(ItemButton button)
+            void ResetButton(ItemButton button)
             {
                 if (button.Date.HasValue) Attributes.SelectedDates.Remove(button.Date.Value);
                 var spD = Attributes.SpecialDates?.FirstOrDefault(s => s.Date == button.Date);
                 Unselect(button);
                 if (spD != null) button.Enabled = spD.Selectable;
             }
-
         }
     }
-
 }

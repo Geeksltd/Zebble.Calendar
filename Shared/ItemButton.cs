@@ -23,6 +23,7 @@
             }
 
             internal void SetDisabled() => Enabled = Selected = false;
+
             internal void Select() => Enabled = Selected = true;
         }
     }

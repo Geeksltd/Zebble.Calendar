@@ -6,9 +6,9 @@ namespace Zebble
     {
         class HeaderView : Stack
         {
-            private TextView Title;
-            private TextView Previous;
-            private TextView Next;
+            TextView Title;
+            TextView Previous;
+            TextView Next;
 
             public AsyncEvent TitleTapped;
             public AsyncEvent PreviousTapped;
@@ -95,5 +95,4 @@ namespace Zebble
             }
         }
     }
-    
 }

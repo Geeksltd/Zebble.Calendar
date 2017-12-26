@@ -70,13 +70,9 @@ namespace Zebble
             {
                 if (EnterAnimation != null)
                 {
-                    var exitAni = Task.CompletedTask;
-
-                    //if (ExitAnimation != null)
-                    //    exitAni = EnterAnimation.OnNativeStart(() => FromView.Animate(ExitAnimation));
                     await EnterAnimation.Task;
 
-                    await exitAni;
+                    await ExitAnimation.Task;
                 }
                 else if (ExitAnimation != null) await FromView.Animate(ExitAnimation);
             }

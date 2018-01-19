@@ -1,7 +1,7 @@
 ﻿{
   "dependencies": {
-    "Zebble": "4.2.373",
-    "Zebble.Grid": "3.12.147"
+    "Zebble": "4.3.100",
+    "Zebble.Grid": "3.12.148"
   },
   "frameworks": {
     "uap10.0.10240": {}

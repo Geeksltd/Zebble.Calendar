@@ -10,7 +10,7 @@
     <description>A calendar component allowing the user to select dates. It supports month and year views too.</description>
     <authors>Geeks Ltd</authors>
     <dependencies>
-      <!-- <dependency id="Zebble....." version="..." />  -->
+      <dependency id="Zebble.Grid" version="3.12.148" />
     </dependencies>
   </metadata>
   <files>

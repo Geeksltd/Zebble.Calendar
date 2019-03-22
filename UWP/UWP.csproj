@@ -112,7 +112,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Zebble">
-      <Version>4.4.156</Version>
+      <Version>4.4.185</Version>
     </PackageReference>
     <PackageReference Include="Zebble.Grid">
       <Version>3.12.148</Version>

@@ -1,4 +1,4 @@
-[logo]: https://raw.githubusercontent.com/Geeksltd/Zebble.Calendar/master/Shared/NuGet/Icon.png "Zebble.Calendar"
+﻿[logo]: https://raw.githubusercontent.com/Geeksltd/Zebble.Calendar/master/icon.png "Zebble.Calendar"
 
 
 ## Zebble.Calendar

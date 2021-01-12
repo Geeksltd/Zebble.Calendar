@@ -7,7 +7,7 @@
     <RootNamespace>Zebble</RootNamespace>
     <PackageId>Zebble.Calendar</PackageId>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
-    <Version>1.2.152.0</Version>
+    <Version>1.2.153.0</Version>
     <PackOnBuild>true</PackOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <LangVersion>default</LangVersion>
@@ -66,7 +66,7 @@
     <None Remove="Zebble-LicenseAgreement.txt" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Zebble.Grid" Version="3.12.157" />
+    <PackageReference Include="Zebble.Grid" Version="3.12.159" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Android\" />
